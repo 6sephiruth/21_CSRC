@@ -1,13 +1,13 @@
 
 # hw
 
-MODEL := cifar10_CNN
+MODEL := cifar10_KAGGLE
 
 # cifar10 전용
 
-GPU := 3
+GPU := 2
 SEED := 0
-EPOCHS := 30
+EPOCHS := 100
 BATCH := 32
 
 OPTIMIZER := adam

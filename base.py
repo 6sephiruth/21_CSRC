@@ -35,6 +35,7 @@ np.random.seed(args.seed)
 
 os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(args.gpu)    # silence some tensorflow messages
+os.environ["CUDA_VISIBLE_DEVICES"]= str(args.gpu)
 
 # enable memory growth
 physical_devices = tf.config.list_physical_devices('GPU')
@@ -65,17 +66,27 @@ if os.path.exists(model_dir):
 
 else:
 
+    checkpoint = ModelCheckpoint(checkpoint_path, 
+                                save_best_only=True, 
+                                save_weights_only=True, 
+                                monitor='val_loss',
+                                verbose=1)
+
     cifar10_model.model.compile(optimizer='adam',
-                loss='categorical_crossentropy',
-                metrics=['accuracy'])
+                                loss='categorical_crossentropy',
+                                metrics=['accuracy'])
 
     history = cifar10_model.model.fit(x_train, y_train,
                                 batch_size=args.batch,
                                 epochs=args.epochs,
                                 validation_data=(x_test, y_test),
                                 shuffle=True,
+                                callbacks=[checkpoint],
+
     )
 
     cifar10_model.model.save(model_dir)
 
-cifar10_model.model.trainable = False
+cifar10_model = eval(args.model)()
+
+cifar10_model.model.evaluate(x_test, y_test)

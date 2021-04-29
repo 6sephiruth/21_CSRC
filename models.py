@@ -5,13 +5,15 @@ from tensorflow.keras.layers import *
 
 from tensorflow.keras import Model, Sequential
 
+from keras.layers import Dense, Dropout, Activation, Flatten
+from keras.layers import Conv2D, MaxPooling2D
 
 # https://www.tensorflow.org/addons/tutorials/layers_weightnormalization
 class cifar10_CNN(Model):
     def __init__(self):
         super(cifar10_CNN, self).__init__()
         self.model = self.build_model()
-        self.wow = 4
+
     def build_model(self):
 
         # WeightNorm ConvNet
@@ -28,4 +30,30 @@ class cifar10_CNN(Model):
 
         return wn_model
 
+class cifar10_KAGGLE(Model):
+    def __init__(self):
+        super(cifar10_KAGGLE, self).__init__()
+        self.model = self.build_model()
 
+    def build_model(self):
+
+        cnn_model = tf.keras.Sequential([
+            Conv2D(32, (3, 3), padding='same',input_shape=(32, 32, 3), activation='relu'),
+            Conv2D(32, (3, 3), activation='relu'),
+            MaxPooling2D(pool_size=(2, 2)),
+            Dropout(0.25),
+            
+            # CONV => RELU => CONV => RELU => POOL => DROPOUT
+            Conv2D(64, (3, 3), padding='same', activation='relu'),
+            Conv2D(64, (3, 3), activation='relu'),
+            MaxPooling2D(pool_size=(2, 2)),
+            Dropout(0.25),
+
+            # FLATTERN => DENSE => RELU => DROPOUT
+            Flatten(),
+            Dense(512, activation='relu'),
+            Dropout(0.5),
+            # a softmax classifier
+            Dense(10, activation='softmax'),
+        ])
+        return cnn_model
