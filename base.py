@@ -4,9 +4,15 @@ import numpy as np
 import os
 
 from models import *
+from tqdm import trange, tqdm
+
+import pickle
 
 from keras.callbacks import ModelCheckpoint
 
+from cleverhans.tf2.attacks.fast_gradient_method import fast_gradient_method
+
+import shap
 
 ### command line arguments ###
 parser = ArgumentParser()
@@ -24,8 +30,8 @@ parser.add_argument('--epochs', type=int,
                     default=100, help='epochs of model train')
 parser.add_argument('--batch', type=int,
                     default=64, help='batch of model train')
-parser.add_argument('--optimizer',
-                    default='adam', help='optimizer method')
+parser.add_argument('--xai',
+                    default='vanilla_saliency_map', help='xai method')
 
 
 args = parser.parse_args()
@@ -34,7 +40,7 @@ tf.random.set_seed(args.seed)
 np.random.seed(args.seed)
 
 os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = str(args.gpu)    # silence some tensorflow messages
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'    # silence some tensorflow messages
 os.environ["CUDA_VISIBLE_DEVICES"]= str(args.gpu)
 
 # enable memory growth
@@ -59,10 +65,10 @@ if not os.path.exists('models/ckpt'):
 checkpoint_path = f'models/ckpt/{args.model}.ckpt'
 model_dir = f'models/{args.model}'
 
-cifar10_model = eval(args.model)()
+model = eval(args.model)()
 
 if os.path.exists(model_dir):
-    cifar10_model = tf.keras.models.load_model(model_dir)
+    model = tf.keras.models.load_model(model_dir)
 
 else:
 
@@ -72,11 +78,11 @@ else:
                                 monitor='val_loss',
                                 verbose=1)
 
-    cifar10_model.model.compile(optimizer='adam',
+    model.call_model.compile(optimizer='adam',
                                 loss='categorical_crossentropy',
                                 metrics=['accuracy'])
 
-    history = cifar10_model.model.fit(x_train, y_train,
+    history = model.call_model.fit(x_train, y_train,
                                 batch_size=args.batch,
                                 epochs=args.epochs,
                                 validation_data=(x_test, y_test),
@@ -85,8 +91,4 @@ else:
 
     )
 
-    cifar10_model.model.save(model_dir)
-
-cifar10_model = eval(args.model)()
-
-cifar10_model.model.evaluate(x_test, y_test)
+model.trainable = False

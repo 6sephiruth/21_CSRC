@@ -10,11 +10,11 @@ SEED := 0
 EPOCHS := 100
 BATCH := 32
 
-OPTIMIZER := adam
+XAI := shap
 
 
 
-MODEL_ARG := --model $(MODEL) --gpu $(GPU) --seed $(SEED) --epochs $(EPOCHS) --batch $(BATCH) --optimizer $(OPTIMIZER)
+MODEL_ARG := --model $(MODEL) --gpu $(GPU) --seed $(SEED) --epochs $(EPOCHS) --batch $(BATCH) --xai $(XAI)
 
 
 base : *.py

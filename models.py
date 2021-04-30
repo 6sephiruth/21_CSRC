@@ -33,7 +33,7 @@ class cifar10_CNN(Model):
 class cifar10_KAGGLE(Model):
     def __init__(self):
         super(cifar10_KAGGLE, self).__init__()
-        self.model = self.build_model()
+        self.call_model = self.build_model()
 
     def build_model(self):
 
